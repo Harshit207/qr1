@@ -29,7 +29,6 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      /* Simulated tech background */
       background-image: 
         radial-gradient(circle at 15% 50%, rgba(0, 119, 255, 0.08), transparent 40%),
         radial-gradient(circle at 85% 50%, rgba(0, 240, 255, 0.05), transparent 40%),
@@ -132,7 +131,7 @@
       50% { opacity: 0.4; }
     }
 
-    /* THE NATIVE VIDEO PLAYER */
+    /* NATIVE VIDEO PLAYER */
     .video-frame-wrapper {
       position: relative;
       width: 100%;
@@ -222,12 +221,12 @@
       
       <div class="player-header">
         <h3><span class="status-dot"></span> LIVE ARCHIVE BROADCAST</h3>
-        <span style="font-size: 0.8rem; color: var(--cyan-bright);">SOURCE: GITHUB CDN [ ||| ]</span>
+        <span id="bufferStatus" style="font-size: 0.8rem; color: var(--cyan-bright);">STATUS: PRE-BUFFERING DATA...</span>
       </div>
 
       <div class="video-frame-wrapper">
-        <!-- NO MORE INTERNET ARCHIVE. DIRECTLY PULLING QR1.MP4 FROM GITHUB -->
-        <video controls autoplay muted playsinline preload="auto">
+        <!-- Autoplay attribute removed from HTML tag; managed dynamically by JavaScript -->
+        <video id="archiveVideo" controls muted playsinline preload="auto">
           <source src="qr1.mp4" type="video/mp4">
           Your browser does not support the video tag.
         </video>
@@ -257,6 +256,34 @@
     <span>[NETWORK LATENCY: 2ms]</span>
     <span>[PROJECT_QR1_LOADED]</span>
   </div>
+
+  <!-- AUTO-BUFFERING SCRIPT -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const video = document.getElementById('archiveVideo');
+      const statusText = document.getElementById('bufferStatus');
+      let isBufferDelayActive = false;
+
+      // Event triggered when browser has fetched initial metadata/video frame
+      video.addEventListener('canplay', () => {
+        if (!isBufferDelayActive) {
+          isBufferDelayActive = true;
+          if (statusText) statusText.textContent = "STATUS: BUILDING SAFETY BUFFER (2.5s)...";
+
+          // Hold playback for 2.5 seconds to accumulate data headroom
+          setTimeout(() => {
+            video.play().then(() => {
+              if (statusText) statusText.textContent = "SOURCE: GITHUB CDN [ BUFFER OPTIMIZED ]";
+            }).catch(err => {
+              // Fallback if browser blocks automated playback
+              if (statusText) statusText.textContent = "PRESS PLAY TO START STREAM";
+              console.log("Autoplay check:", err);
+            });
+          }, 2500); 
+        }
+      }, { once: true });
+    });
+  </script>
 
 </body>
 </html>
