@@ -4,7 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Class XII Science | Beyond Tomorrow 2050</title>
+
+  <!-- Performance Optimization: Resource Preconnecting -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Rajdhani:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Performance Optimization: Video Resource Preload Hint -->
+  <link rel="preload" href="qr1.mp4" as="video" type="video/mp4">
+
   <style>
     :root {
       --bg-base: #030811;
@@ -77,12 +85,14 @@
     .video-section {
       background: var(--panel-glass);
       backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
       border: 1px solid var(--cyan-dim);
       border-radius: 8px;
       padding: 20px;
       box-shadow: 0 0 30px rgba(0, 240, 255, 0.1);
       position: relative;
       margin-bottom: 40px;
+      contain: content;
     }
 
     /* Sci-Fi Corner Brackets */
@@ -93,6 +103,7 @@
       width: 30px;
       height: 30px;
       border: 3px solid var(--cyan-bright);
+      pointer-events: none;
     }
     
     .video-section::before { top: -2px; left: -2px; border-right: none; border-bottom: none; }
@@ -104,7 +115,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 15px;
+      margin-bottom: 12px;
       font-family: 'Orbitron', sans-serif;
     }
 
@@ -117,21 +128,43 @@
       letter-spacing: 1.5px;
     }
 
+    /* GPU Accelerated Status Pulse */
     .status-dot {
       width: 12px;
       height: 12px;
       background-color: var(--cyan-bright);
       border-radius: 50%;
       box-shadow: 0 0 10px var(--cyan-bright);
-      animation: pulse 1.5s infinite;
+      transform: translateZ(0);
+      will-change: opacity;
+      animation: pulse 1.5s infinite ease-in-out;
     }
 
     @keyframes pulse {
       0%, 100% { opacity: 1; }
-      50% { opacity: 0.4; }
+      50% { opacity: 0.3; }
     }
 
-    /* NATIVE VIDEO PLAYER */
+    /* HUD BUFFER TRACKER BAR */
+    .hud-buffer-container {
+      width: 100%;
+      height: 4px;
+      background: rgba(0, 240, 255, 0.1);
+      border-radius: 2px;
+      margin-bottom: 15px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .hud-buffer-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--cyan-bright);
+      box-shadow: 0 0 8px var(--cyan-bright);
+      transition: width 0.3s ease;
+    }
+
+    /* NATIVE VIDEO PLAYER CONTAINER */
     .video-frame-wrapper {
       position: relative;
       width: 100%;
@@ -158,19 +191,22 @@
       margin-bottom: 30px;
     }
 
+    /* Hardware Accelerated Cards */
     .card {
       background: var(--panel-glass);
       border: 1px solid var(--cyan-dim);
       border-radius: 12px;
       padding: 25px;
       position: relative;
-      transition: all 0.3s ease;
+      transform: translateZ(0);
+      will-change: transform, border-color, box-shadow;
+      transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
     }
 
     .card:hover {
       border-color: var(--cyan-bright);
       box-shadow: 0 0 20px rgba(0, 240, 255, 0.15);
-      transform: translateY(-5px);
+      transform: translateY(-4px) translateZ(0);
     }
 
     .card h4 {
@@ -221,12 +257,17 @@
       
       <div class="player-header">
         <h3><span class="status-dot"></span> LIVE ARCHIVE BROADCAST</h3>
-        <span id="bufferStatus" style="font-size: 0.8rem; color: var(--cyan-bright);">STATUS: PRE-BUFFERING DATA...</span>
+        <span id="bufferStatus" style="font-size: 0.85rem; color: var(--cyan-bright);">STATUS: STANDBY [PRE-BUFFERING DATA...]</span>
+      </div>
+
+      <!-- Sci-Fi Visual Buffer Bar -->
+      <div class="hud-buffer-container">
+        <div id="bufferFill" class="hud-buffer-fill"></div>
       </div>
 
       <div class="video-frame-wrapper">
-        <!-- Autoplay attribute removed from HTML tag; managed dynamically by JavaScript -->
-        <video id="archiveVideo" controls muted playsinline preload="auto">
+        <!-- MANUAL PLAY ENFORCED: controls enabled, preload=auto, playsinline -->
+        <video id="archiveVideo" controls preload="auto" playsinline>
           <source src="qr1.mp4" type="video/mp4">
           Your browser does not support the video tag.
         </video>
@@ -252,36 +293,78 @@
   </div>
 
   <div class="system-status">
-    <span>[SYSTEM CHECK: AI_DEBATE_MODULE ONLINE]</span>
-    <span>[NETWORK LATENCY: 2ms]</span>
+    <span>[SYSTEM CHECK: ONLINE]</span>
+    <span>[HARDWARE ACCELERATION: ACTIVE]</span>
     <span>[PROJECT_QR1_LOADED]</span>
   </div>
 
-  <!-- AUTO-BUFFERING SCRIPT -->
+  <!-- HIGH-PERFORMANCE OPTIMIZED SCRIPT -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const video = document.getElementById('archiveVideo');
       const statusText = document.getElementById('bufferStatus');
-      let isBufferDelayActive = false;
+      const bufferFill = document.getElementById('bufferFill');
+      let isBufferingCushionActive = false;
 
-      // Event triggered when browser has fetched initial metadata/video frame
-      video.addEventListener('canplay', () => {
-        if (!isBufferDelayActive) {
-          isBufferDelayActive = true;
-          if (statusText) statusText.textContent = "STATUS: BUILDING SAFETY BUFFER (2.5s)...";
+      // 1. Force initial background download
+      video.load();
 
-          // Hold playback for 2.5 seconds to accumulate data headroom
-          setTimeout(() => {
-            video.play().then(() => {
-              if (statusText) statusText.textContent = "SOURCE: GITHUB CDN [ BUFFER OPTIMIZED ]";
-            }).catch(err => {
-              // Fallback if browser blocks automated playback
-              if (statusText) statusText.textContent = "PRESS PLAY TO START STREAM";
-              console.log("Autoplay check:", err);
-            });
-          }, 2500); 
+      // 2. Continuous Real-time Buffer Tracker
+      function updateBufferProgress() {
+        if (video.buffered.length > 0 && video.duration > 0) {
+          const bufferedEnd = video.buffered.end(video.buffered.length - 1);
+          const totalDuration = video.duration;
+          const percent = Math.min(100, Math.floor((bufferedEnd / totalDuration) * 100));
+
+          // Update HUD UI
+          if (bufferFill) bufferFill.style.width = percent + '%';
+
+          if (!video.paused) {
+            if (statusText) statusText.textContent = `STATUS: STREAMING [ BUFFER: ${percent}% ]`;
+          } else if (!isBufferingCushionActive) {
+            if (percent >= 99) {
+              if (statusText) statusText.textContent = "STATUS: READY [ 100% PRE-LOADED ]";
+            } else {
+              if (statusText) statusText.textContent = `STATUS: STANDBY [ PRE-BUFFERED: ${percent}% ]`;
+            }
+          }
         }
-      }, { once: true });
+      }
+
+      // Attach browser download events
+      video.addEventListener('progress', updateBufferProgress);
+      video.addEventListener('loadedmetadata', updateBufferProgress);
+
+      // 3. Smart Manual Play Cushion Guard
+      video.addEventListener('play', () => {
+        // Check if buffered data is under 15% when manual play is clicked
+        if (video.buffered.length > 0 && video.duration > 0) {
+          const bufferedEnd = video.buffered.end(0);
+          const currentTime = video.currentTime;
+          const remainingBuffer = bufferedEnd - currentTime;
+
+          // If less than 3 seconds of buffer head room exists, pause briefly to build cushion
+          if (remainingBuffer < 3 && !isBufferingCushionActive) {
+            isBufferingCushionActive = true;
+            video.pause();
+
+            if (statusText) statusText.textContent = "STATUS: STABILIZING STREAM CUSHION...";
+
+            setTimeout(() => {
+              isBufferingCushionActive = false;
+              video.play();
+            }, 1800);
+          } else {
+            if (statusText) statusText.textContent = "STATUS: STREAMING BROADCAST";
+          }
+        }
+      });
+
+      video.addEventListener('pause', () => {
+        if (!isBufferingCushionActive && statusText) {
+          statusText.textContent = "STATUS: PAUSED";
+        }
+      });
     });
   </script>
 
