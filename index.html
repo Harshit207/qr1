@@ -5,12 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Class XII Science | Beyond Tomorrow 2050</title>
 
-  <!-- Preconnect and Font Optimizations -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=Rajdhani:wght@400;500;600&display=swap" rel="stylesheet">
 
-  <!-- Instant Video Preload Hint -->
+  <!-- Matches your repository file name -->
   <link rel="preload" href="qr1.mp4" as="video" type="video/mp4">
 
   <style>
@@ -52,7 +51,6 @@
       z-index: 1;
     }
 
-    /* HEADER */
     header {
       text-align: center;
       margin-bottom: 30px;
@@ -81,7 +79,6 @@
       letter-spacing: 1px;
     }
 
-    /* HUD VIDEO SECTION */
     .video-section {
       background: var(--panel-glass);
       backdrop-filter: blur(10px);
@@ -95,7 +92,6 @@
       contain: content;
     }
 
-    /* Sci-Fi Corner Brackets */
     .video-section::before, .video-section::after,
     .video-bracket-bottom-left, .video-bracket-bottom-right {
       content: "";
@@ -128,7 +124,6 @@
       letter-spacing: 1.5px;
     }
 
-    /* GPU-Accelerated Live Pulse Indicator */
     .status-dot {
       width: 12px;
       height: 12px;
@@ -145,7 +140,6 @@
       50% { opacity: 0.3; }
     }
 
-    /* HUD BUFFER TRACKER BAR */
     .hud-buffer-container {
       width: 100%;
       height: 4px;
@@ -164,7 +158,6 @@
       transition: width 0.2s ease-out;
     }
 
-    /* NATIVE VIDEO PLAYER CONTAINER */
     .video-frame-wrapper {
       position: relative;
       width: 100%;
@@ -183,7 +176,6 @@
       outline: none;
     }
 
-    /* HIGHLIGHT CARDS */
     .highlights-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -222,7 +214,6 @@
       line-height: 1.5;
     }
 
-    /* SYSTEM STATUS BAR */
     .system-status {
       text-align: center;
       font-family: 'Orbitron', sans-serif;
@@ -259,13 +250,12 @@
         <span id="bufferStatus" style="font-size: 0.85rem; color: var(--cyan-bright);">STATUS: READY [ STREAM OPTIMIZED ]</span>
       </div>
 
-      <!-- Live Sci-Fi Buffer Bar -->
       <div class="hud-buffer-container">
         <div id="bufferFill" class="hud-buffer-fill"></div>
       </div>
 
       <div class="video-frame-wrapper">
-        <!-- Optimized Video Player -->
+        <!-- MATCHES YOUR GITHUB FILE NAME -->
         <video id="archiveVideo" controls preload="auto" playsinline>
           <source src="qr1.mp4" type="video/mp4">
           Your browser does not support the video tag.
@@ -297,14 +287,12 @@
     <span>[PROJECT_QR1_LOADED]</span>
   </div>
 
-  <!-- LIGHTWEIGHT REAL-TIME TELEMETRY SCRIPT -->
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const video = document.getElementById('archiveVideo');
       const statusText = document.getElementById('bufferStatus');
       const bufferFill = document.getElementById('bufferFill');
 
-      // Update HUD telemetry display
       function updateBufferProgress() {
         if (video.buffered.length > 0 && video.duration > 0) {
           const bufferedEnd = video.buffered.end(video.buffered.length - 1);
